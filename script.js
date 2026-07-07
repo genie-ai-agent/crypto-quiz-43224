@@ -1,8 +1,10 @@
-// TOP50.QUIZ — live crypto quiz over CoinGecko top 50 by market cap
+// TOP50.QUIZ — live crypto quiz over CoinGecko trending + top-mcap padding
 
-const API = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h';
-const CACHE_KEY_PREFIX = 'top50quiz::';
+const TRENDING_API = 'https://api.coingecko.com/api/v3/search/trending';
+const MARKETS_API = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h';
+const CACHE_KEY_PREFIX = 'top50quiz::v2::';
 const QUIZ_LEN = 10;
+const TARGET_COUNT = 50;
 
 const $ = (id) => document.getElementById(id);
 
@@ -37,32 +39,93 @@ function cacheKey() {
   return CACHE_KEY_PREFIX + day;
 }
 
+// CoinGecko trending returns market_cap/price as USD-formatted strings like "$1,234,567"
+function parseUSDString(s) {
+  if (typeof s === 'number') return s;
+  if (!s || typeof s !== 'string') return null;
+  const cleaned = s.replace(/[$,\s]/g, '');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? null : n;
+}
+
 async function loadCoins() {
   const key = cacheKey();
   try {
     const raw = localStorage.getItem(key);
     if (raw) {
       const cached = JSON.parse(raw);
-      if (Array.isArray(cached) && cached.length >= 40) return cached;
+      if (cached && Array.isArray(cached.coins) && cached.coins.length >= 40) return cached;
     }
   } catch (_) {}
 
-  const res = await fetch(API, { headers: { 'accept': 'application/json' } });
-  if (!res.ok) throw new Error('api ' + res.status);
-  const data = await res.json();
-  const trimmed = data.map((c) => ({
-    id: c.id,
-    symbol: (c.symbol || '').toUpperCase(),
-    name: c.name,
-    image: c.image,
-    price: c.current_price,
-    mcap: c.market_cap,
-    rank: c.market_cap_rank,
-    vol: c.total_volume,
-    change24h: c.price_change_percentage_24h,
-  }));
-  try { localStorage.setItem(key, JSON.stringify(trimmed)); } catch (_) {}
-  return trimmed;
+  // 1) trending (15 coins, search-volume based)
+  const trendRes = await fetch(TRENDING_API, { headers: { 'accept': 'application/json' } });
+  if (!trendRes.ok) throw new Error('trending ' + trendRes.status);
+  const trendJson = await trendRes.json();
+  const trending = (trendJson.coins || []).map((entry) => {
+    const c = entry.item || {};
+    const d = c.data || {};
+    return {
+      id: c.id,
+      symbol: (c.symbol || '').toUpperCase(),
+      name: c.name,
+      image: c.large || c.small || c.thumb,
+      price: parseUSDString(d.price),
+      mcap: parseUSDString(d.market_cap),
+      rank: c.market_cap_rank,
+      vol: parseUSDString(d.total_volume),
+      change24h: d.price_change_percentage_24h && typeof d.price_change_percentage_24h.usd === 'number'
+        ? d.price_change_percentage_24h.usd
+        : null,
+      trending: true,
+    };
+  }).filter((c) => c.id && c.name && c.symbol);
+
+  // 2) pad with top-mcap coins to reach 50
+  const marketsRes = await fetch(MARKETS_API, { headers: { 'accept': 'application/json' } });
+  if (!marketsRes.ok) throw new Error('markets ' + marketsRes.status);
+  const marketsJson = await marketsRes.json();
+  const trendingIds = new Set(trending.map((c) => c.id));
+  const padding = marketsJson
+    .filter((c) => !trendingIds.has(c.id))
+    .map((c) => ({
+      id: c.id,
+      symbol: (c.symbol || '').toUpperCase(),
+      name: c.name,
+      image: c.image,
+      price: c.current_price,
+      mcap: c.market_cap,
+      rank: c.market_cap_rank,
+      vol: c.total_volume,
+      change24h: c.price_change_percentage_24h,
+      trending: false,
+    }));
+
+  // patch trending entries missing price/mcap/rank/change with markets data if present
+  const marketsById = new Map(marketsJson.map((c) => [c.id, c]));
+  for (const t of trending) {
+    const m = marketsById.get(t.id);
+    if (m) {
+      if (t.price == null) t.price = m.current_price;
+      if (t.mcap == null) t.mcap = m.market_cap;
+      if (t.rank == null) t.rank = m.market_cap_rank;
+      if (t.vol == null) t.vol = m.total_volume;
+      if (t.change24h == null) t.change24h = m.price_change_percentage_24h;
+    }
+  }
+
+  const combined = [...trending, ...padding].slice(0, TARGET_COUNT);
+  // require enough usable fields for question generation
+  const usable = combined.filter((c) => c.price != null && c.mcap != null);
+  const finalList = usable.length >= 40 ? usable : combined;
+
+  const payload = {
+    coins: finalList,
+    trendingCount: trending.length,
+    fetchedAt: new Date().toISOString(),
+  };
+  try { localStorage.setItem(key, JSON.stringify(payload)); } catch (_) {}
+  return payload;
 }
 
 // ---------- utils ----------
@@ -230,7 +293,8 @@ function setStatus(kind, text) {
   $('status-text').textContent = text;
 }
 
-function renderIntroMeta(coins) {
+function renderIntroMeta(payload) {
+  const coins = payload.coins;
   $('m-count').textContent = String(coins.length);
   const total = coins.reduce((s, c) => s + (c.mcap || 0), 0);
   $('m-mcap').textContent = fmtUSD(total);
@@ -240,6 +304,12 @@ function renderIntroMeta(coins) {
   avgEl.innerHTML = `<span class="${pctClass(avg)}">${fmtPct(avg)}</span>`;
   const now = new Date();
   $('m-sync').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // trending badge list
+  const tl = $('trending-list');
+  if (tl) {
+    const trending = coins.filter((c) => c.trending);
+    tl.innerHTML = trending.map((c) => `<span class="trend-pill">🔥 ${c.symbol}</span>`).join('');
+  }
 }
 
 function renderQuestion() {
@@ -336,10 +406,11 @@ function startQuiz() {
 async function boot() {
   setStatus(null, 'syncing_coingecko...');
   try {
-    const coins = await loadCoins();
-    state.coins = coins;
-    renderIntroMeta(coins);
-    setStatus('live', 'live · ' + coins.length + ' coins');
+    const payload = await loadCoins();
+    state.coins = payload.coins;
+    state.trendingCount = payload.trendingCount || 0;
+    renderIntroMeta(payload);
+    setStatus('live', 'live · ' + payload.coins.length + ' coins · ' + state.trendingCount + ' trending');
     const btn = $('start-btn');
     btn.disabled = false;
   } catch (err) {

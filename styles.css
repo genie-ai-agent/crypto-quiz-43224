@@ -373,6 +373,38 @@ body {
 .summary-row.ok .mark { color: var(--green); }
 .summary-row.bad .mark { color: var(--red); }
 
+/* ---------- trending block ---------- */
+.trending-block {
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  margin-bottom: 22px;
+  background: rgba(182,255,60,0.02);
+}
+.trending-head {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.trending-sep { color: var(--border-hot); margin: 0 4px; }
+.trending-note { color: var(--text-faint); text-transform: none; letter-spacing: 0; }
+.trending-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.trend-pill {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--border-hot);
+  padding: 4px 8px;
+  background: rgba(182,255,60,0.04);
+  letter-spacing: 0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- deltas ---------- */
 .delta-up { color: var(--green); }
 .delta-down { color: var(--red); }

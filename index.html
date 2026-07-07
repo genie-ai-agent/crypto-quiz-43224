@@ -28,8 +28,8 @@
     <section class="ascii-block" aria-hidden="true">
 <pre>
 ┌──────────────────────────────────────────┐
-│  &gt; top_50_by_market_cap.load()            │
-│  &gt; source: coingecko.api                  │
+│  &gt; trending.load() + top_mcap.pad(50)     │
+│  &gt; source: coingecko/search/trending      │
 │  &gt; mode: quiz --questions 10              │
 └──────────────────────────────────────────┘
 </pre>
@@ -38,14 +38,18 @@
     <section id="intro-screen" class="screen">
       <h1 class="screen-title">// welcome, operator</h1>
       <p class="screen-body">
-        Ten questions. Each pulled live from the top 50 coins by market cap.
-        Symbols, ranks, prices, 24h deltas. No warmup.
+        Ten questions drawn from CoinGecko's live <span class="highlight">trending</span> coins
+        plus top market caps to fill 50. Symbols, ranks, prices, 24h deltas. No warmup.
       </p>
       <div class="meta-grid" id="meta-grid">
         <div class="meta"><span class="k">coins_loaded</span><span class="v" id="m-count">--</span></div>
         <div class="meta"><span class="k">total_mcap</span><span class="v" id="m-mcap">--</span></div>
         <div class="meta"><span class="k">avg_24h</span><span class="v" id="m-avg">--</span></div>
         <div class="meta"><span class="k">last_sync</span><span class="v" id="m-sync">--</span></div>
+      </div>
+      <div class="trending-block">
+        <div class="trending-head">&gt; trending_now <span class="trending-sep">::</span> <span class="trending-note">search-volume, live</span></div>
+        <div class="trending-list" id="trending-list"></div>
       </div>
       <button class="cta" id="start-btn" disabled>
         <span class="cta-caret">▶</span> initialize_quiz
