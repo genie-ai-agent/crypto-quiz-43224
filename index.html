@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TOP50.QUIZ // live crypto terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="blink">▊</span>
+      <span class="brand-name">TOP50.QUIZ</span>
+      <span class="brand-sub">// live_crypto_terminal</span>
+    </div>
+    <div class="status" id="status">
+      <span class="dot" id="status-dot"></span>
+      <span id="status-text">booting...</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="ascii-block" aria-hidden="true">
+<pre>
+┌──────────────────────────────────────────┐
+│  &gt; top_50_by_market_cap.load()            │
+│  &gt; source: coingecko.api                  │
+│  &gt; mode: quiz --questions 10              │
+└──────────────────────────────────────────┘
+</pre>
+    </section>
+
+    <section id="intro-screen" class="screen">
+      <h1 class="screen-title">// welcome, operator</h1>
+      <p class="screen-body">
+        Ten questions. Each pulled live from the top 50 coins by market cap.
+        Symbols, ranks, prices, 24h deltas. No warmup.
+      </p>
+      <div class="meta-grid" id="meta-grid">
+        <div class="meta"><span class="k">coins_loaded</span><span class="v" id="m-count">--</span></div>
+        <div class="meta"><span class="k">total_mcap</span><span class="v" id="m-mcap">--</span></div>
+        <div class="meta"><span class="k">avg_24h</span><span class="v" id="m-avg">--</span></div>
+        <div class="meta"><span class="k">last_sync</span><span class="v" id="m-sync">--</span></div>
+      </div>
+      <button class="cta" id="start-btn" disabled>
+        <span class="cta-caret">▶</span> initialize_quiz
+      </button>
+    </section>
+
+    <section id="quiz-screen" class="screen hidden">
+      <div class="quiz-head">
+        <span class="q-index">Q<span id="q-num">1</span>/10</span>
+        <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+        <span class="q-score">score: <span id="q-score">0</span></span>
+      </div>
+      <h2 class="question" id="question"></h2>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="cta ghost" id="next-btn" hidden>
+        next_question <span class="cta-caret">▶</span>
+      </button>
+    </section>
+
+    <section id="result-screen" class="screen hidden">
+      <h1 class="screen-title">// run complete</h1>
+      <div class="score-big">
+        <span id="final-score">0</span><span class="score-total">/10</span>
+      </div>
+      <p class="verdict" id="verdict"></p>
+      <div class="summary" id="summary"></div>
+      <button class="cta" id="retry-btn">
+        <span class="cta-caret">▶</span> run_again
+      </button>
+    </section>
+  </main>
+
+  <footer class="footbar">
+    <span>data: coingecko.com</span>
+    <span class="sep">::</span>
+    <span>cached_daily</span>
+    <span class="sep">::</span>
+    <span id="foot-time"></span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
