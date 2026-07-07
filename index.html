@@ -3,91 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TOP50.QUIZ // live crypto terminal</title>
+  <title>Moon Girl · a crypto quiz 💖</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="scanlines" aria-hidden="true"></div>
+  <div class="blob blob-1" aria-hidden="true"></div>
+  <div class="blob blob-2" aria-hidden="true"></div>
+  <div class="blob blob-3" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="brand">
-      <span class="blink">▊</span>
-      <span class="brand-name">TOP50.QUIZ</span>
-      <span class="brand-sub">// live_crypto_terminal</span>
+      <span class="brand-emoji">🌸</span>
+      <span class="brand-name">moon girl</span>
+      <span class="brand-sub">a crypto quiz</span>
     </div>
     <div class="status" id="status">
       <span class="dot" id="status-dot"></span>
-      <span id="status-text">booting...</span>
+      <span id="status-text">warming up…</span>
     </div>
   </header>
 
   <main class="shell">
-    <section class="ascii-block" aria-hidden="true">
-<pre>
-┌──────────────────────────────────────────┐
-│  &gt; trending.load() + top_mcap.pad(50)     │
-│  &gt; source: coingecko/search/trending      │
-│  &gt; mode: quiz --questions 10              │
-└──────────────────────────────────────────┘
-</pre>
-    </section>
-
     <section id="intro-screen" class="screen">
-      <h1 class="screen-title">// welcome, operator</h1>
+      <div class="sparkle sparkle-a">✦</div>
+      <div class="sparkle sparkle-b">✧</div>
+      <div class="sparkle sparkle-c">✦</div>
+
+      <p class="eyebrow">hi bestie ✿</p>
+      <h1 class="screen-title">how well do you <em>really</em> know the top&nbsp;50?</h1>
       <p class="screen-body">
-        Ten questions drawn from CoinGecko's live <span class="highlight">trending</span> coins
-        plus top market caps to fill 50. Symbols, ranks, prices, 24h deltas. No warmup.
+        Ten questions, pulled live from CoinGecko's <span class="highlight">trending list</span>
+        plus top coins by market cap. Prices, ranks, tickers, vibes. Ready?
       </p>
+
       <div class="meta-grid" id="meta-grid">
-        <div class="meta"><span class="k">coins_loaded</span><span class="v" id="m-count">--</span></div>
-        <div class="meta"><span class="k">total_mcap</span><span class="v" id="m-mcap">--</span></div>
-        <div class="meta"><span class="k">avg_24h</span><span class="v" id="m-avg">--</span></div>
-        <div class="meta"><span class="k">last_sync</span><span class="v" id="m-sync">--</span></div>
+        <div class="meta"><span class="k">coins loaded</span><span class="v" id="m-count">--</span></div>
+        <div class="meta"><span class="k">total mcap</span><span class="v" id="m-mcap">--</span></div>
+        <div class="meta"><span class="k">avg 24h</span><span class="v" id="m-avg">--</span></div>
+        <div class="meta"><span class="k">last sync</span><span class="v" id="m-sync">--</span></div>
       </div>
+
       <div class="trending-block">
-        <div class="trending-head">&gt; trending_now <span class="trending-sep">::</span> <span class="trending-note">search-volume, live</span></div>
+        <div class="trending-head"><span class="heart">♡</span> trending right now <span class="trending-note">by search volume</span></div>
         <div class="trending-list" id="trending-list"></div>
       </div>
+
       <button class="cta" id="start-btn" disabled>
-        <span class="cta-caret">▶</span> initialize_quiz
+        start the quiz <span class="cta-caret">✨</span>
       </button>
     </section>
 
     <section id="quiz-screen" class="screen hidden">
       <div class="quiz-head">
-        <span class="q-index">Q<span id="q-num">1</span>/10</span>
+        <span class="q-index">question <span id="q-num">1</span> / 10</span>
         <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
-        <span class="q-score">score: <span id="q-score">0</span></span>
+        <span class="q-score">score <span id="q-score">0</span></span>
       </div>
       <h2 class="question" id="question"></h2>
       <div class="options" id="options"></div>
       <div class="feedback" id="feedback"></div>
       <button class="cta ghost" id="next-btn" hidden>
-        next_question <span class="cta-caret">▶</span>
+        next question <span class="cta-caret">→</span>
       </button>
     </section>
 
     <section id="result-screen" class="screen hidden">
-      <h1 class="screen-title">// run complete</h1>
+      <p class="eyebrow">all done ✿</p>
+      <h1 class="screen-title">your score</h1>
       <div class="score-big">
         <span id="final-score">0</span><span class="score-total">/10</span>
       </div>
       <p class="verdict" id="verdict"></p>
       <div class="summary" id="summary"></div>
       <button class="cta" id="retry-btn">
-        <span class="cta-caret">▶</span> run_again
+        play again <span class="cta-caret">↻</span>
       </button>
     </section>
   </main>
 
   <footer class="footbar">
-    <span>data: coingecko.com</span>
-    <span class="sep">::</span>
-    <span>cached_daily</span>
-    <span class="sep">::</span>
+    <span>data from coingecko 🦎</span>
+    <span class="sep">·</span>
+    <span>refreshed daily</span>
+    <span class="sep">·</span>
     <span id="foot-time"></span>
   </footer>
 
