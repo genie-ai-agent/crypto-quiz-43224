@@ -136,6 +136,17 @@ function renderResult() {
         <div class="trait"><div class="trait-label">Spirit</div><div class="trait-value">${traits.spirit}</div></div>
       </div>
       <div class="result-quote">${a.quote}</div>
+
+      <section class="coins-block">
+        <div class="coins-eyebrow">✨ Coins for your vibe</div>
+        <h3 class="coins-title">Your ${a.name} shortlist</h3>
+        <p class="coins-blurb">${COIN_BLURB[a.key] || ''}</p>
+        <div class="coins-grid" id="coins-grid">
+          <div class="coins-loading">pulling live prices from CoinGecko… 💗</div>
+        </div>
+        <div class="coins-foot">live data · CoinGecko · not financial advice, obvi</div>
+      </section>
+
       <div class="result-actions">
         <button class="cta" id="share">Share my result 💌</button>
         <button class="cta secondary" id="retake">Retake quiz</button>
@@ -143,6 +154,7 @@ function renderResult() {
     </section>
     <div class="toast" id="toast">Link copied ✨</div>
   `;
+  loadCoinsFor(a);
   document.getElementById('retake').addEventListener('click', () => {
     state.step = 'intro';
     state.forced = null;
@@ -162,6 +174,56 @@ function renderResult() {
       }
     } catch (e) { /* user cancelled */ }
   });
+}
+
+async function loadCoinsFor(a) {
+  const grid = document.getElementById('coins-grid');
+  if (!grid) return;
+  try {
+    const all = await fetchTopMarkets();
+    const picks = pickCoinsFor(a.key, all);
+    if (!picks.length) {
+      grid.innerHTML = `<div class="coins-loading">couldn't load coins right now, try again in a bit 🌸</div>`;
+      return;
+    }
+    grid.innerHTML = picks.map(c => coinCard(c)).join('');
+  } catch (e) {
+    grid.innerHTML = `<div class="coins-loading">couldn't reach CoinGecko right now 💫 try again in a minute</div>`;
+  }
+}
+
+function fmtPrice(n) {
+  if (n == null || isNaN(n)) return '—';
+  if (n >= 1000) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (n >= 1) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  if (n >= 0.01) return '$' + n.toFixed(3);
+  if (n >= 0.0001) return '$' + n.toFixed(5);
+  return '$' + n.toExponential(2);
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  const s = n >= 0 ? '+' : '';
+  return `${s}${n.toFixed(2)}%`;
+}
+
+function coinCard(c) {
+  const chg = c.price_change_percentage_24h_in_currency ?? c.price_change_percentage_24h ?? 0;
+  const up = chg >= 0;
+  return `
+    <a class="coin-card ${up ? 'up' : 'down'}" href="https://www.coingecko.com/en/coins/${c.id}" target="_blank" rel="noopener">
+      <div class="coin-head">
+        <img class="coin-logo" src="${c.image}" alt="" loading="lazy" />
+        <div class="coin-id">
+          <div class="coin-name">${c.name}</div>
+          <div class="coin-sym">${(c.symbol || '').toUpperCase()} · #${c.market_cap_rank ?? '—'}</div>
+        </div>
+      </div>
+      <div class="coin-nums">
+        <div class="coin-price">${fmtPrice(c.current_price)}</div>
+        <div class="coin-chg ${up ? 'up' : 'down'}">${fmtPct(chg)}</div>
+      </div>
+    </a>
+  `;
 }
 
 function showToast(msg) {
