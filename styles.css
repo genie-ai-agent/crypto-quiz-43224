@@ -368,6 +368,212 @@ h1.title .grad {
 
 .foot { position: relative; z-index: 5; text-align: center; padding: 20px; font-size: 13px; color: var(--ink-soft); font-weight: 600; }
 
+/* question subline */
+.q-sub {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: -18px 0 22px;
+  line-height: 1.4;
+}
+
+/* secondary archetype pill on result */
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 212, 229, 0.6), rgba(230, 214, 255, 0.6));
+  border: 1px solid rgba(255, 143, 191, 0.25);
+  margin: 0 0 20px;
+  flex-wrap: wrap;
+}
+.secondary-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.secondary-name {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--pink-deep);
+}
+
+/* mind read block */
+.mind-block {
+  margin: 8px 0 22px;
+  padding: 22px 22px 18px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(243, 230, 255, 0.6));
+  border: 1px solid rgba(201, 167, 255, 0.3);
+  box-shadow: var(--shadow-soft);
+}
+.mind-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #7a4dc7;
+  margin-bottom: 12px;
+}
+.mind-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mind-list li {
+  position: relative;
+  padding: 12px 14px 12px 34px;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px -6px rgba(201, 167, 255, 0.35);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.mind-list li::before {
+  content: '✨';
+  position: absolute;
+  left: 10px;
+  top: 11px;
+  font-size: 14px;
+}
+
+/* dimension meters */
+.dims-block {
+  margin: 0 0 22px;
+  padding: 22px 22px 18px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 240, 247, 0.6));
+  border: 1px solid rgba(255, 143, 191, 0.22);
+  box-shadow: var(--shadow-soft);
+}
+.dims-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--pink-deep);
+  margin-bottom: 14px;
+}
+.meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+.meter { display: flex; flex-direction: column; gap: 4px; }
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.meter-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+}
+.meter-val {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--pink-deep);
+}
+.meter-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 143, 191, 0.15);
+  overflow: hidden;
+}
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink), var(--lavender));
+  transition: width 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.meter-anchors {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+/* psychology columns */
+.psych-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 26px;
+}
+.psych-col {
+  padding: 18px 18px;
+  border-radius: 20px;
+  background: white;
+  border: 1px solid rgba(255, 143, 191, 0.2);
+  box-shadow: var(--shadow-soft);
+}
+.psych-col.wide { grid-column: 1 / -1; background: linear-gradient(135deg, rgba(255, 212, 229, 0.35), rgba(230, 214, 255, 0.35)); }
+.psych-head {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.psych-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.psych-col li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.psych-col li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), var(--lavender));
+}
+
+@media (max-width: 560px) {
+  .meters { grid-template-columns: 1fr; }
+  .psych-block { grid-template-columns: 1fr; }
+  .psych-col.wide { grid-column: auto; }
+  .mind-block, .dims-block { padding: 18px 16px; }
+  .mind-list li { font-size: 14px; padding: 10px 12px 10px 30px; }
+  .q-sub { font-size: 14px; margin: -14px 0 18px; }
+}
+
 @media (max-width: 560px) {
   .card { padding: 28px 22px; border-radius: 26px; }
   .traits { grid-template-columns: 1fr; }

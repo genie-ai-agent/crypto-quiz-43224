@@ -1,8 +1,19 @@
 // state
+const ARCH_KEYS = ['diamond','bluechip','degen','yield','witch','muse'];
+const DIM_KEYS = ['risk','patience','analytical','social','fomo','ego','loss_av','discipline'];
+
+function blankScores() {
+  const s = {}; ARCH_KEYS.forEach(k => s[k] = 0); return s;
+}
+function blankDims() {
+  const s = {}; DIM_KEYS.forEach(k => s[k] = { sum: 0, n: 0 }); return s;
+}
+
 const state = {
-  step: 'intro', // intro | q | result
+  step: 'intro',
   qIndex: 0,
-  scores: { diamond: 0, bluechip: 0, degen: 0, yield: 0, witch: 0, muse: 0 },
+  scores: blankScores(),
+  dims: blankDims(),
   answers: []
 };
 
@@ -37,29 +48,28 @@ function renderIntro() {
     <section class="card">
       <span class="eyebrow">Cryptogal Quiz</span>
       <h1 class="title">what kind of<br><span class="grad">crypto girl</span><br>are you, really?</h1>
-      <p class="sub">Ten questions. Six archetypes. One shockingly accurate read on how you actually invest (or want to). Diamond hands? Degen queen? Yield goddess? Let's find out.</p>
+      <p class="sub">Twelve questions built to read the money-mind under the vibes. We're profiling risk tolerance, patience, FOMO, ego, discipline, the works. You'll get an archetype, a mirror, and a live coin shortlist that fits how you actually invest.</p>
       <button class="cta" id="start">Start the quiz ✨</button>
       <div class="meta-row">
-        <span class="chip">10 questions</span>
-        <span class="chip">~2 minutes</span>
+        <span class="chip">12 questions</span>
+        <span class="chip">~3 minutes</span>
         <span class="chip">6 archetypes</span>
-        <span class="chip">shareable result</span>
+        <span class="chip">mind read included</span>
       </div>
     </section>
   `;
   document.getElementById('start').addEventListener('click', () => {
     state.step = 'q';
     state.qIndex = 0;
-    state.scores = { diamond: 0, bluechip: 0, degen: 0, yield: 0, witch: 0, muse: 0 };
+    state.scores = blankScores();
+    state.dims = blankDims();
     state.answers = [];
     render();
   });
 
-  // if URL has a result share, offer to view it
   const params = new URLSearchParams(location.search);
   const shared = params.get('r');
   if (shared && ARCHETYPES[shared]) {
-    const sub = document.querySelector('.sub');
     const btn = document.createElement('button');
     btn.className = 'cta secondary';
     btn.style.marginLeft = '10px';
@@ -83,6 +93,7 @@ function renderQuestion() {
       <div class="progress-track"><div class="progress-fill" style="width: ${pct}%"></div></div>
       <div class="q-num">Question ${state.qIndex + 1} / ${total}</div>
       <h2 class="q-text">${q.q}</h2>
+      ${q.sub ? `<div class="q-sub">${q.sub}</div>` : ''}
       <div class="options">
         ${q.options.map((o, i) => `
           <button class="option" data-i="${i}">
@@ -96,12 +107,15 @@ function renderQuestion() {
     btn.addEventListener('click', () => {
       const i = parseInt(btn.dataset.i, 10);
       const chosen = q.options[i];
-      state.scores[chosen.type] += 1;
-      state.answers.push(chosen.type);
+      const w = chosen.weights || {};
+      Object.keys(w).forEach(k => { if (state.scores[k] != null) state.scores[k] += w[k]; });
+      const d = chosen.dims || {};
+      Object.keys(d).forEach(k => {
+        if (state.dims[k]) { state.dims[k].sum += d[k]; state.dims[k].n += 1; }
+      });
+      state.answers.push({ q: state.qIndex, opt: i });
       state.qIndex += 1;
-      if (state.qIndex >= QUESTIONS.length) {
-        state.step = 'result';
-      }
+      if (state.qIndex >= QUESTIONS.length) state.step = 'result';
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -111,23 +125,160 @@ function renderQuestion() {
 function pickWinner() {
   if (state.forced && ARCHETYPES[state.forced]) return ARCHETYPES[state.forced];
   let bestKey = 'diamond', bestVal = -1;
-  const order = ['diamond','bluechip','degen','yield','witch','muse'];
-  for (const k of order) {
+  for (const k of ARCH_KEYS) {
     if (state.scores[k] > bestVal) { bestVal = state.scores[k]; bestKey = k; }
   }
   return ARCHETYPES[bestKey];
 }
 
+function secondaryArchetype(winnerKey) {
+  let bestKey = null, bestVal = -1;
+  for (const k of ARCH_KEYS) {
+    if (k === winnerKey) continue;
+    if (state.scores[k] > bestVal) { bestVal = state.scores[k]; bestKey = k; }
+  }
+  const winnerVal = state.scores[winnerKey] || 1;
+  const ratio = bestVal / winnerVal;
+  if (ratio >= 0.55) return { key: bestKey, ratio };
+  return null;
+}
+
+function dimensionProfile() {
+  const out = {};
+  for (const k of DIM_KEYS) {
+    const d = state.dims[k];
+    if (!d || d.n === 0) { out[k] = 0.5; continue; }
+    const avg = d.sum / d.n;
+    out[k] = Math.max(0, Math.min(1, (avg + 1) / 2));
+  }
+  return out;
+}
+
+const DIM_LABELS = {
+  risk:       { name: 'Risk appetite',    low: 'preservation', high: 'full send' },
+  patience:   { name: 'Time horizon',     low: 'right now',    high: 'decades' },
+  analytical: { name: 'Head vs gut',      low: 'gut',          high: 'spreadsheet' },
+  social:     { name: 'Solo vs pack',     low: 'lone wolf',    high: 'group chat' },
+  fomo:       { name: 'FOMO pull',        low: 'immune',       high: 'deeply online' },
+  ego:        { name: 'Quiet vs loud',    low: 'quiet flex',   high: 'loud flex' },
+  loss_av:    { name: 'Loss sensitivity', low: 'stone cold',   high: 'every red hurts' },
+  discipline: { name: 'Impulse control',  low: 'impulsive',    high: 'systems' }
+};
+
+function buildMindRead(prof) {
+  const notes = [];
+  const push = (t) => notes.push(t);
+
+  if (prof.risk >= 0.7 && prof.discipline < 0.4) {
+    push("You take real risk and you take it a little impulsively. The upside is real; the downside is that one bad size can eat ten good calls. Position size is your biggest lever, not coin selection.");
+  } else if (prof.risk >= 0.7 && prof.discipline >= 0.6) {
+    push("High risk, high rules. You go hard, but you go hard on purpose. That combo is rarer than you think, and it's basically the whole game.");
+  } else if (prof.risk <= 0.35 && prof.discipline >= 0.6) {
+    push("You're cautious and rules-based, which is a genuinely under-priced edge in a market that runs on adrenaline. Just make sure the caution is strategy, not fear in a nice outfit.");
+  } else if (prof.risk <= 0.35 && prof.discipline < 0.4) {
+    push("You're cautious but a bit reactive. The caution is protecting you, but small emotional moves stack up. A written plan would do more for your P&L than any pick.");
+  }
+
+  if (prof.patience >= 0.65 && prof.fomo < 0.4) {
+    push("Long horizons, low FOMO. This is the psychological profile that actually captures cycles. You can sit through boring, which is where compounding lives.");
+  } else if (prof.patience < 0.4 && prof.fomo >= 0.6) {
+    push("Short horizon, high FOMO. Every scroll feels like a call to action. Not fatal, but worth naming, because the market prices your attention whether you like it or not.");
+  } else if (prof.fomo >= 0.65) {
+    push("FOMO is a real line item in your P&L, not a personality quirk. Anything that lowers your screen time is probably alpha.");
+  }
+
+  if (prof.analytical >= 0.7 && prof.social < 0.4) {
+    push("Your edge is analytical and solitary. Careful you don't research yourself out of every entry. Being right early and being right on time pay very differently.");
+  } else if (prof.social >= 0.7 && prof.analytical < 0.4) {
+    push("You get conviction from your people, not from a doc. That's a real edge in culture-driven markets, and a real risk when the group chat is wrong together.");
+  } else if (prof.analytical >= 0.6 && prof.social >= 0.6) {
+    push("You read the docs and you read the room. That's the whole game most of the time.");
+  }
+
+  if (prof.loss_av >= 0.7) {
+    push("Losses land in your body, not just your spreadsheet. Smaller position sizes will improve your decisions more than better picks ever will. Sizing is self-care.");
+  } else if (prof.loss_av <= 0.3) {
+    push("You're unusually cool with red. That's a strength, and also a warning: cool with loss can drift into ignoring loss. Make sure the stop still exists, even if it doesn't hurt.");
+  }
+
+  if (prof.ego >= 0.7) {
+    push("You want to be right out loud. Fine. Just track whether you're sizing to be right, or sizing to make money. Those are two different games with different scoreboards.");
+  }
+
+  if (!notes.length) {
+    push("You're a balanced profile. No single dimension is running the show, which is genuinely valuable. The trap is drifting into whatever the market rewarded most recently.");
+  }
+
+  return notes.slice(0, 4);
+}
+
+function meterRow(key, pct) {
+  const label = DIM_LABELS[key];
+  const p = Math.round(pct * 100);
+  return `
+    <div class="meter">
+      <div class="meter-head">
+        <span class="meter-name">${label.name}</span>
+        <span class="meter-val">${p}%</span>
+      </div>
+      <div class="meter-track"><div class="meter-fill" style="width:${p}%"></div></div>
+      <div class="meter-anchors"><span>${label.low}</span><span>${label.high}</span></div>
+    </div>
+  `;
+}
+
 function renderResult() {
   const a = pickWinner();
+  const sec = state.forced ? null : secondaryArchetype(a.key);
   progressPill.textContent = `${a.emoji} ${a.name}`;
   const traits = a.traits;
+  const prof = state.forced ? null : dimensionProfile();
+  const mind = prof ? buildMindRead(prof) : null;
+  const meters = prof ? DIM_KEYS.map(k => meterRow(k, prof[k])).join('') : '';
+
+  const secBlock = sec ? `
+    <div class="secondary">
+      <span class="secondary-eyebrow">with a strong streak of</span>
+      <span class="secondary-name">${ARCHETYPES[sec.key].emoji} ${ARCHETYPES[sec.key].name}</span>
+    </div>
+  ` : '';
+
+  const mindBlock = mind ? `
+    <section class="mind-block">
+      <div class="mind-eyebrow">🧠 your investor mind, read back to you</div>
+      <ul class="mind-list">
+        ${mind.map(m => `<li>${m}</li>`).join('')}
+      </ul>
+    </section>
+
+    <section class="dims-block">
+      <div class="dims-eyebrow">✨ your money-mind profile</div>
+      <div class="meters">${meters}</div>
+    </section>
+
+    <section class="psych-block">
+      <div class="psych-col">
+        <div class="psych-head">🌸 your strengths</div>
+        <ul>${a.psych.strengths.map(x => `<li>${x}</li>`).join('')}</ul>
+      </div>
+      <div class="psych-col">
+        <div class="psych-head">👀 watch-outs</div>
+        <ul>${a.psych.blindspots.map(x => `<li>${x}</li>`).join('')}</ul>
+      </div>
+      <div class="psych-col wide">
+        <div class="psych-head">💬 sit with these</div>
+        <ul>${a.psych.questions.map(x => `<li>${x}</li>`).join('')}</ul>
+      </div>
+    </section>
+  ` : '';
+
   app.innerHTML = `
     <section class="card">
       <div class="result-crown">${a.emoji}</div>
       <div class="result-eyebrow">You are the</div>
       <h1 class="result-name">${a.name}</h1>
       <div class="result-tag">${a.tag}</div>
+      ${secBlock}
       <p class="result-desc">${a.desc}</p>
       <div class="traits">
         <div class="trait"><div class="trait-label">Style</div><div class="trait-value">${traits.style}</div></div>
@@ -136,6 +287,8 @@ function renderResult() {
         <div class="trait"><div class="trait-label">Spirit</div><div class="trait-value">${traits.spirit}</div></div>
       </div>
       <div class="result-quote">${a.quote}</div>
+
+      ${mindBlock}
 
       <section class="coins-block">
         <div class="coins-eyebrow">✨ Coins for your vibe</div>
@@ -158,6 +311,8 @@ function renderResult() {
   document.getElementById('retake').addEventListener('click', () => {
     state.step = 'intro';
     state.forced = null;
+    state.scores = blankScores();
+    state.dims = blankDims();
     history.replaceState(null, '', location.pathname);
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -172,7 +327,7 @@ function renderResult() {
         await navigator.clipboard.writeText(`${shareText} ${url}`);
         showToast('Link copied ✨');
       }
-    } catch (e) { /* user cancelled */ }
+    } catch (e) { /* cancelled */ }
   });
 }
 
@@ -234,7 +389,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-// handle direct-share landing: if ?r=key, jump straight to that result
 (function bootstrap() {
   const params = new URLSearchParams(location.search);
   const shared = params.get('r');
