@@ -1,97 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Moon Girl · a crypto quiz 💖</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cryptogal Quiz · What's your investor type?</title>
+<meta name="description" content="A little personality quiz to find your Cryptogal investor archetype. Diamond Hands Darling? Degen Queen? Find out ✨" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,600;1,9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="blob blob-1" aria-hidden="true"></div>
-  <div class="blob blob-2" aria-hidden="true"></div>
-  <div class="blob blob-3" aria-hidden="true"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="sparkles" id="sparkles"></div>
 
   <header class="topbar">
     <div class="brand">
-      <span class="brand-emoji">🌸</span>
-      <span class="brand-name">moon girl</span>
-      <span class="brand-sub">a crypto quiz</span>
+      <span class="logo-dot"></span>
+      <span class="brand-name">Cryptogal</span>
+      <span class="brand-tag">quiz</span>
     </div>
-    <div class="status" id="status">
-      <span class="dot" id="status-dot"></span>
-      <span id="status-text">warming up…</span>
-    </div>
+    <div class="pill" id="progress-pill">✨ ready when you are</div>
   </header>
 
-  <main class="shell">
-    <section id="intro-screen" class="screen">
-      <div class="sparkle sparkle-a">✦</div>
-      <div class="sparkle sparkle-b">✧</div>
-      <div class="sparkle sparkle-c">✦</div>
+  <main id="app" class="stage"></main>
 
-      <p class="eyebrow">hi bestie ✿</p>
-      <h1 class="screen-title">how well do you <em>really</em> know the top&nbsp;50?</h1>
-      <p class="screen-body">
-        Ten questions, pulled live from CoinGecko's <span class="highlight">trending list</span>
-        plus top coins by market cap. Prices, ranks, tickers, vibes. Ready?
-      </p>
+  <footer class="foot">made with 💖 for the girls · not financial advice, obvi</footer>
 
-      <div class="meta-grid" id="meta-grid">
-        <div class="meta"><span class="k">coins loaded</span><span class="v" id="m-count">--</span></div>
-        <div class="meta"><span class="k">total mcap</span><span class="v" id="m-mcap">--</span></div>
-        <div class="meta"><span class="k">avg 24h</span><span class="v" id="m-avg">--</span></div>
-        <div class="meta"><span class="k">last sync</span><span class="v" id="m-sync">--</span></div>
-      </div>
-
-      <div class="trending-block">
-        <div class="trending-head"><span class="heart">♡</span> trending right now <span class="trending-note">by search volume</span></div>
-        <div class="trending-list" id="trending-list"></div>
-      </div>
-
-      <button class="cta" id="start-btn" disabled>
-        start the quiz <span class="cta-caret">✨</span>
-      </button>
-    </section>
-
-    <section id="quiz-screen" class="screen hidden">
-      <div class="quiz-head">
-        <span class="q-index">question <span id="q-num">1</span> / 10</span>
-        <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
-        <span class="q-score">score <span id="q-score">0</span></span>
-      </div>
-      <h2 class="question" id="question"></h2>
-      <div class="options" id="options"></div>
-      <div class="feedback" id="feedback"></div>
-      <button class="cta ghost" id="next-btn" hidden>
-        next question <span class="cta-caret">→</span>
-      </button>
-    </section>
-
-    <section id="result-screen" class="screen hidden">
-      <p class="eyebrow">all done ✿</p>
-      <h1 class="screen-title">your score</h1>
-      <div class="score-big">
-        <span id="final-score">0</span><span class="score-total">/10</span>
-      </div>
-      <p class="verdict" id="verdict"></p>
-      <div class="summary" id="summary"></div>
-      <button class="cta" id="retry-btn">
-        play again <span class="cta-caret">↻</span>
-      </button>
-    </section>
-  </main>
-
-  <footer class="footbar">
-    <span>data from coingecko 🦎</span>
-    <span class="sep">·</span>
-    <span>refreshed daily</span>
-    <span class="sep">·</span>
-    <span id="foot-time"></span>
-  </footer>
-
-  <script src="script.js"></script>
+  <script src="archetypes.js"></script>
+  <script src="quiz.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
